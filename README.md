@@ -8,9 +8,11 @@ Intended to be used in shell functions and aliases, such as:
 ```Zsh
 alias goto='cd $(selector $HOME/*)'
 
+# or
+
 function goto {
-	local path=$(selector $HOME/*)/$1
-	cd $path
+	local DIR=$(selector $HOME/*)/$1
+	cd $DIR
 	ls
 }
 ```
