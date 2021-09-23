@@ -9,6 +9,7 @@ extern crate cursive;
 
 use anyhow::Result;
 use cursive::align::HAlign;
+use cursive::event::{Event, Key};
 use cursive::theme::BaseColor::Black;
 use cursive::theme::Color::Dark;
 use cursive::theme::PaletteColor::{Background, Secondary};
@@ -16,7 +17,6 @@ use cursive::theme::{BorderStyle, Palette, Theme};
 use cursive::traits::*;
 use cursive::views::{Dialog, LinearLayout, PaddedView, SelectView, TextView};
 use cursive::Cursive;
-use cursive::event::{Event, Key};
 
 fn main() -> Result<()> {
     let m = clap_app!(myapp =>
@@ -97,9 +97,7 @@ fn main() -> Result<()> {
     });
     let vc = vals.clone();
     siv.set_global_callback(Event::Key(Key::Del), move |s: &mut Cursive| {
-        s.call_on_name("filter", |flt: &mut TextView| {
-                flt.set_content("")
-            });
+        s.call_on_name("filter", |flt: &mut TextView| flt.set_content(""));
         s.call_on_name("list", |lst: &mut SelectView| {
             lst.clear();
             lst.add_all_str(&vc)
@@ -132,7 +130,7 @@ fn main() -> Result<()> {
 
 ///
 /// Value filter, returning true if the pattern matches the given value.
-/// 
+///
 fn valflt(value: &str, pattern: &str) -> bool {
     value.to_lowercase().contains(&pattern.to_lowercase())
 }
