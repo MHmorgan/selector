@@ -1,0 +1,19 @@
+[package]
+name = "selector"
+version = "1.0.0"
+authors = ["Magnus Aa. Hirth <magnus.hirth@gmail.com"]
+edition = "2018"
+description = "Simple terminal application which lets the user select between its input arguments and prints out the the selected choice."
+readme = "README.md"
+documentation = "https://github.com/MHmorgan/selector"
+homepage = "https://github.com/MHmorgan/selector"
+repository = "https://github.com/MHmorgan/selector"
+keywords = ["selector"]
+license = "Mozilla Public License Version 2.0"
+categories = ["command-line-utilities"]
+
+[dependencies]
+clap = "2.33"
+anyhow = "1.0"
+cursive = "0.16"
+
