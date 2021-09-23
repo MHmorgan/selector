@@ -18,3 +18,10 @@ function goto {
 	ls
 }
 ```
+
+Installation
+------------
+
+```
+cargo install selector
+```
