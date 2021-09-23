@@ -29,6 +29,7 @@ fn main() -> Result<()> {
 
     let mut vals: Vec<String> = m.values_of("VALS").unwrap().map(String::from).collect();
     vals.sort();
+    let width: usize = vals.iter().map(String::len).max().unwrap_or(0);
 
     //
     // Application views: Filter label, filter text, and value list.
@@ -122,7 +123,7 @@ fn main() -> Result<()> {
                 ))
                 .child(sel.with_name("list")),
         )
-        .min_width(20),
+        .min_width(width+4),  // Add padding
     );
     siv.run();
     Ok(())
