@@ -9,7 +9,7 @@ documentation = "https://github.com/MHmorgan/selector"
 homepage = "https://github.com/MHmorgan/selector"
 repository = "https://github.com/MHmorgan/selector"
 keywords = ["selector"]
-license = "Mozilla Public License Version 2.0"
+license = "MPL-2.0"
 categories = ["command-line-utilities"]
 
 [dependencies]
