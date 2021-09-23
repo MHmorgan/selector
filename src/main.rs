@@ -20,7 +20,7 @@ use cursive::Cursive;
 
 fn main() -> Result<()> {
     let m = clap_app!(myapp =>
-        (version: "1.0")
+        (version: "1.0.1")
         (author: "Magnus Aa. Hirth <magnus.hirth@gmail.com")
         (about: "Select between multiple arguments")
         (@arg VALS: ... +required "Values to select between")
