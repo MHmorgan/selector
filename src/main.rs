@@ -20,7 +20,7 @@ use cursive::Cursive;
 
 fn main() -> Result<()> {
     let m = clap_app!(myapp =>
-        (version: "1.0.1")
+        (version: "1.1.0")
         (author: "Magnus Aa. Hirth <magnus.hirth@gmail.com")
         (about: "Select between multiple arguments")
         (@arg VALS: ... +required "Values to select between")
@@ -123,7 +123,7 @@ fn main() -> Result<()> {
                 ))
                 .child(sel.with_name("list")),
         )
-        .min_width(width+4),  // Add padding
+        .min_width(width + 4), // Add padding
     );
     siv.run();
     Ok(())
@@ -133,5 +133,8 @@ fn main() -> Result<()> {
 /// Value filter, returning true if the pattern matches the given value.
 ///
 fn valflt(value: &str, pattern: &str) -> bool {
-    value.to_lowercase().contains(&pattern.to_lowercase())
+    let val = value.to_lowercase();
+    pattern
+        .split_whitespace()
+        .all(|p| val.contains(&p.to_lowercase()))
 }
