@@ -1,6 +1,6 @@
 [package]
 name = "selector"
-version = "1.1.0"
+version = "1.2.0"
 authors = ["Magnus Aa. Hirth <magnus.hirth@gmail.com"]
 edition = "2018"
 description = "Simple terminal application which lets the user select between its input arguments and prints out the the selected choice."

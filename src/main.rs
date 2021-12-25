@@ -20,24 +20,39 @@ use cursive::Cursive;
 
 fn main() -> Result<()> {
     let m = clap_app!(myapp =>
-        (version: "1.1.0")
+        (version: "1.2.0")
         (author: "Magnus Aa. Hirth <magnus.hirth@gmail.com")
         (about: "Select between multiple arguments")
         (@arg VALS: ... +required "Values to select between")
+        (@arg FILTER: -f --filter +takes_value "Set the startup value of the selector filter.")
+        (@arg AUTO: -a --auto "Enable automatic selection at startup: if there's only one value to choose from after the startup filters have been applied, choose this value automatically.")
     )
     .get_matches();
 
     let mut vals: Vec<String> = m.values_of("VALS").unwrap().map(String::from).collect();
     vals.sort();
     let width: usize = vals.iter().map(String::len).max().unwrap_or(0);
+    let startup_filter_text: &str = m.value_of("FILTER").unwrap_or("");
+
+    //
+    // Check if there's only one value left after startup filter is applied
+    // if automatic selection is enabled.
+    //
+    if m.is_present("AUTO") {
+        let filtered: Vec<&String> = vals.iter().filter(|s| valflt(s, &startup_filter_text)).collect();
+        if let &[val] = filtered.as_slice() {
+            print!("{}", val);
+            return Ok(())
+        }
+    }
 
     //
     // Application views: Filter label, filter text, and value list.
     //
     let label = TextView::new("Filter: ").style(Secondary);
-    let filter = TextView::new("");
+    let filter = TextView::new(startup_filter_text);
     let mut sel = SelectView::new().h_align(HAlign::Left);
-    sel.add_all_str(&vals);
+    sel.add_all_str(vals.iter().filter(|s| valflt(s, &startup_filter_text)));
     sel.set_on_submit(|s, v: &String| {
         s.quit();
         print!("{}", v)
