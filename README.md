@@ -54,3 +54,5 @@ Installation
 ```
 cargo install selector
 ```
+
+Rust and Cargo must be installed on the system (https://www.rust-lang.org/tools/install)
