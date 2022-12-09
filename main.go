@@ -36,7 +36,11 @@ func main() {
 		os.Exit(0)
 	}
 
-	p := tea.NewProgram(newModel(items), tea.WithAltScreen())
+	p := tea.NewProgram(
+		newModel(items),
+		tea.WithAltScreen(),
+		tea.WithOutput(os.Stderr),
+	)
 
 	var m model
 	if tmp, err := p.Run(); err != nil {
@@ -119,8 +123,8 @@ type model struct {
 
 func newModel(items []list.Item) model {
 	l := list.New(items, list.NewDefaultDelegate(), 0, 0)
-	l.Title = "Select directory"
-	l.SetStatusBarItemName("Directory", "Directories")
+	l.Title = "Select directory:"
+	l.SetShowStatusBar(false)
 	return model{list: l}
 }
 
