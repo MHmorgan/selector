@@ -3,10 +3,14 @@ package main
 import (
 	"flag"
 	"fmt"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/mhmorgan/selector/selection"
-	"log"
 	"os"
+	"os/user"
+	"path"
+	"strconv"
+	"strings"
+
+	"github.com/charmbracelet/bubbles/list"
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 var filter = flag.String("filter", "", "Initial selection filter.")
@@ -16,30 +20,41 @@ func main() {
 	flag.Parse()
 
 	if flag.NArg() < 1 {
-		os.Exit(1)
+		bail("No paths given.")
 	}
 
-	model := selection.New(flag.Args(), *filter)
+	var items []list.Item
+	for _, arg := range flag.Args() {
+		items = append(items, item(arg))
+	}
+	items = filterItems(items, *filter)
 
-	if ranks := selection.Filter(*filter, model.FilterValues()); len(ranks) == 1 {
-		fmt.Print(model.GetValue(0))
+	if len(items) == 0 {
+		bail("No matches found.")
+	} else if len(items) == 1 {
+		fmt.Print(items[0])
 		os.Exit(0)
 	}
 
-	p := tea.NewProgram(model, tea.WithAltScreen())
+	p := tea.NewProgram(newModel(items), tea.WithAltScreen())
 
-	var sl selection.Model
+	var m model
 	if tmp, err := p.Run(); err != nil {
-		log.Fatalln(err)
+		bail(err)
 	} else {
-		sl = tmp.(selection.Model)
+		m = tmp.(model)
 	}
 
-	if val := sl.Choice(); val != "" {
-		fmt.Print(sl.Choice())
+	if val := m.choice; val != "" {
+		fmt.Print(m.choice)
 	} else {
 		os.Exit(1)
 	}
+}
+
+func bail(msg any) {
+	fmt.Fprintln(os.Stderr, msg)
+	os.Exit(1)
 }
 
 func usage() {
@@ -47,4 +62,117 @@ func usage() {
 	fmt.Fprintln(os.Stderr, "Options:")
 	flag.PrintDefaults()
 	os.Exit(2)
+}
+
+func filterItems(items []list.Item, filter string) []list.Item {
+	if filter == "" {
+		return items
+	}
+
+	var filterValues []string
+	for _, item := range items {
+		filterValues = append(filterValues, item.FilterValue())
+	}
+
+	var filtered []list.Item
+	for _, rank := range list.DefaultFilter(filter, filterValues) {
+		filtered = append(filtered, items[rank.Index])
+	}
+	return filtered
+}
+
+// -----------------------------------------------------------------------------
+
+type item string
+
+func (i item) FilterValue() string {
+	return i.Title()
+}
+
+func (i item) Title() string {
+	return path.Base(string(i))
+}
+
+func (i item) Description() string {
+	desc := path.Dir(string(i))
+
+	if u, err := user.Current(); err == nil {
+		desc = strings.Replace(desc, u.HomeDir, "~", 1)
+	}
+
+	return desc
+}
+
+func (i item) String() string {
+	return string(i)
+}
+
+// -----------------------------------------------------------------------------
+
+// model is the main model for the application user interface,
+// containing the program state.
+type model struct {
+	list     list.Model
+	choice   string
+	quitting bool
+}
+
+func newModel(items []list.Item) model {
+	l := list.New(items, list.NewDefaultDelegate(), 0, 0)
+	l.Title = "Select directory"
+	l.SetStatusBarItemName("Directory", "Directories")
+	return model{list: l}
+}
+
+// Init is the first function that will be called. It returns an optional
+// initial command. To not perform an initial command return nil.
+func (m model) Init() tea.Cmd {
+	return nil
+}
+
+// Update is called when a message is received. Use it to inspect messages
+// and, in response, update the model and/or send a command.
+func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+
+	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.list.SetWidth(msg.Width)
+		m.list.SetHeight(msg.Height)
+		return m, nil
+
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "ctrl+c":
+			m.quitting = true
+			return m, tea.Quit
+
+		case "enter":
+			i, ok := m.list.SelectedItem().(item)
+			if ok {
+				m.choice = string(i)
+			}
+			return m, tea.Quit
+
+		default:
+			if n, err := strconv.Atoi(msg.String()); err == nil {
+				n = (n + 9) % 10
+				if n < len(m.list.Items()) {
+					m.list.Select(n)
+				}
+			}
+		}
+	}
+
+	var cmd tea.Cmd
+	m.list, cmd = m.list.Update(msg)
+	return m, cmd
+}
+
+// View renders the program's UI, which is just a string. The view is
+// rendered after every Update.
+func (m model) View() string {
+	if m.quitting {
+		return ""
+	}
+	return m.list.View()
 }
