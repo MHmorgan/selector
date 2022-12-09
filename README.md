@@ -1,12 +1,13 @@
 Selector
 ========
 
-Simple terminal application which lets the user select between its input arguments and prints out the the selected choice.  
+Simple terminal application which lets the user select
+between its input arguments and prints out the selected
+choice.
 
-The usage is simple and intuitive: use the arrow keys to move between values; press enter to select a value;
-type anything to filter the values; press backspace to remove the last filter character, or delete to clear the entire filter text.
-Whitespaces in the filter text are ignored and treated as separators between substrings, all of which must match a value for it
-to pass the filter.
+The usage is simple and intuitive: use the arrow keys to
+move between values; press enter to select a value;
+type `/` to start filtering.
 
 Intended to be used in shell functions and aliases, such as:
 
@@ -22,14 +23,22 @@ function goto {
 }
 ```
 
-Automatic selection with startup filter
----------------------------------------
+Startup filtering
+-----------------
 
-Parameter `-f`/`--filter` sets the startup value of the selector filter.  
-Parameter `-a`/`--auto` enable automatic selection at startup: if there's only one value to choose from after the startup filters have been applied, choose this value automatically and return.
+Parameter `-filter` applies a filter to the list of choices
+at startup.  
+This is useful when the list of choices is long and the user
+wants to filter it down to a few choices before selecting
+one.
 
-This allows implementing a `goto` shell function which will automatically switch to a directory if the sufficient filter is provided by the user.
-With the function below, calling `goto foo` will automatically switch to the `$HOME/Documents/foodir` directory.
+If the filter matches exactly one choice, it is
+automatically selected and printed.  
+This allows implementing a `goto` shell function which will
+automatically switch to a directory if the sufficient filter
+is provided by the user. With the function below,
+calling `goto foo` will automatically switch to
+the `$HOME/Documents/foodir` directory.
 
 ```Zsh
 #!/bin/zsh
@@ -39,7 +48,7 @@ function goto {
 		$HOME/{Documents,Downloads}
 		$HOME/Documents/foodir
 	)
-	local DIR=$(selector ${=mypaths} -af "$*")
+	local DIR=$(selector -filter "$*" ${=mypaths})
 	# Don't try to change directory if selector didn't return a value
 	[[ -n "$DIR" ]] || return
 	echo $DIR
@@ -52,7 +61,5 @@ Installation
 ------------
 
 ```
-cargo install selector
+go install github.com/mhmorgan/selector
 ```
-
-Rust and Cargo must be installed on the system (https://www.rust-lang.org/tools/install)
