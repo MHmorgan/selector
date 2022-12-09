@@ -61,5 +61,5 @@ Installation
 ------------
 
 ```
-go install github.com/mhmorgan/selector
+go install github.com/mhmorgan/selector@latest
 ```
